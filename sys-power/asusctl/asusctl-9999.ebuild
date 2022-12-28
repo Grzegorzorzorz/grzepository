@@ -17,7 +17,7 @@ HOMEPAGE="
 	https://gitlab.com/asus-linux/asusctl
 "
 	#$(cargo_crate_uris)
-EGIT_REPO_URI="EGIT_REPO_URI"
+EGIT_REPO_URI="https://gitlab.com/asus-linux/asusctl.git"
 SRC_URI="https://gitlab.com/asus-linux/asusctl/-/archive/main/asusctl-main.tar.gz"
 
 LICENSE="MPL-2.0"
