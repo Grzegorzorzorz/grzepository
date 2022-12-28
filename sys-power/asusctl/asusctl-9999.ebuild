@@ -10,23 +10,19 @@ inherit cargo git-r3 linux-info xdg desktop systemd udev
 _PN="asusd"
 
 DESCRIPTION="Utilities to provide extended functionality to ASUS laptops."
-# Double check the homepage as the cargo_metadata crate
-# does not provide this value so instead repository is used
+
 HOMEPAGE="
 	https://asus-linux.org
 	https://gitlab.com/asus-linux/asusctl
 "
-	#$(cargo_crate_uris)
+
 EGIT_REPO_URI="https://gitlab.com/asus-linux/asusctl.git"
-SRC_URI="https://gitlab.com/asus-linux/asusctl/-/archive/main/asusctl-main.tar.gz"
 
 LICENSE="MPL-2.0"
 SLOT="0/4"
 KEYWORDS="-* ~amd64"
 IUSE="+acpi anime gfx gnome gui notify systemd"
 REQUIRED_USE="gnome? ( gfx )"
-
-RESTRICT="mirror"
 
 RDEPEND="!!sys-power/rog-core
 	!!sys-power/asus-nb-ctrl
@@ -48,10 +44,12 @@ DEPEND="${RDEPEND}
 	sys-apps/dbus
 "
 
-S="${WORKDIR}/${PN}-main/"
+S="${WORKDIR}/${PN}/"
+EGIT_CHECKOUT_DIR="${S}"
 
 src_unpack() {
-	unpack ${PN}-main.tar.gz
+	git-r3_fetch
+	git-r3_checkout
 	cargo_live_src_unpack
 }
 
