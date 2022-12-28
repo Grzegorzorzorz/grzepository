@@ -5,7 +5,7 @@
 
 EAPI=8
 
-inherit cargo git-r3 linux-info xdg desktop systemd
+inherit cargo git-r3 linux-info xdg desktop systemd udev
 
 _PN="asusd"
 
@@ -17,14 +17,13 @@ HOMEPAGE="
 	https://gitlab.com/asus-linux/asusctl
 "
 	#$(cargo_crate_uris)
-SRC_URI="
-	https://gitlab.com/asus-linux/asusctl/-/archive/main/asusctl-main.tar.gz
-"
+EGIT_REPO_URI="EGIT_REPO_URI"
+SRC_URI="https://gitlab.com/asus-linux/asusctl/-/archive/main/asusctl-main.tar.gz"
 
 LICENSE="MPL-2.0"
 SLOT="0/4"
 KEYWORDS="-* ~amd64"
-IUSE="+acpi gfx gnome gui notify systemd"
+IUSE="+acpi anime gfx gnome gui notify systemd"
 REQUIRED_USE="gnome? ( gfx )"
 
 RESTRICT="mirror"
@@ -115,9 +114,10 @@ src_install() {
 		dobin target/release/rog-control-center
 	fi
 
-	# animes (apps)
-	insinto /usr/share/${_PN}
-	doins -r rog-anime/data/anime
+	if use anime; then
+		insinto /usr/share/${_PN}
+		doins -r rog-anime/data/anime
+	fi
 
 	# binary
 	dobin "target/release/"{asusd,asusd-user,asusctl}
