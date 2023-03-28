@@ -57,7 +57,7 @@ src_install() {
 	insinto /usr/share/xsessions/
 	doins example/hypr.desktop
 
-	insinto /usr/share/${PN}
+	insinto /usr/share/${PN}/
 	doins example/hypr.conf
 
 	dobin "${BUILD_DIR}/Hypr"
