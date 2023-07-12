@@ -1,4 +1,4 @@
-# Copyright 1999-2022 Gentoo Authors
+# Copyright 1999-2023 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
@@ -6,10 +6,11 @@ EAPI=8
 MY_PN="${PN/-bin/}"
 MY_PV="${PV/-r*/}"
 
+CHROMIUM_VERSION="102"
 CHROMIUM_LANGS="
-	am ar bg bn ca cs da de el en-GB en-US es es-419 et fa fi fil fr gu he hi
+	af am ar bg bn ca cs da de el en-GB en-US es es-419 et fa fi fil fr gu he hi
 	hr hu id it ja kn ko lt lv ml mr ms nb nl pl pt-BR pt-PT ro ru sk sl sr sv
-	sw ta te th tr uk vi zh-CN zh-TW
+	sw ta te th tr uk ur vi zh-CN zh-TW
 "
 
 inherit chromium-2 desktop linux-info optfeature unpacker xdg
@@ -22,13 +23,10 @@ LICENSE="all-rights-reserved"
 SLOT="0"
 KEYWORDS="amd64"
 RESTRICT="bindist mirror strip test"
-IUSE="+seccomp system-ffmpeg"
+IUSE="appindicator +seccomp"
 
 RDEPEND="
-		|| (
-			>=app-accessibility/at-spi2-core-2.46.0:2
-			( app-accessibility/at-spi2-atk dev-libs/atk )
-		)
+	>=app-accessibility/at-spi2-core-2.46.0:2
 	app-crypt/libsecret
 	dev-libs/expat
 	dev-libs/glib:2
@@ -56,24 +54,12 @@ RDEPEND="
 	x11-libs/libxkbcommon
 	x11-libs/libxshmfence
 	x11-libs/pango
-	system-ffmpeg? ( media-video/ffmpeg[chromium] )
+	appindicator? ( dev-libs/libayatana-appindicator )
 "
 
 DESTDIR="/opt/${MY_PN}"
 
-QA_PREBUILT="
-	${DESTDIR#/}/${MY_PN^}
-	${DESTDIR#/}/chrome-sandbox
-	${DESTDIR#/}/libffmpeg.so
-	${DESTDIR#/}/libvk_swiftshader.so
-	${DESTDIR#/}/libvulkan.so
-	${DESTDIR#/}/libEGL.so
-	${DESTDIR#/}/libGLESv2.so
-	${DESTDIR#/}/libVkICD_mock_icd.so
-	${DESTDIR#/}/swiftshader/libEGL.so
-	${DESTDIR#/}/swiftshader/libGLESv2.so
-	${DESTDIR#/}/swiftshader/libvk_swiftshader.so
-"
+QA_PREBUILT="*"
 
 CONFIG_CHECK="~USER_NS"
 
@@ -106,11 +92,6 @@ src_prepare() {
 			"${MY_PN}.desktop" ||
 			die "sed failed for seccomp"
 	fi
-	# USE system-ffmpeg
-	if use system-ffmpeg; then
-		rm libffmpeg.so || die
-		elog "Using system ffmpeg. This is experimental and may lead to crashes."
-	fi
 }
 
 src_install() {
@@ -121,25 +102,28 @@ src_install() {
 
 	exeinto "${DESTDIR}"
 
-	doexe "${MY_PN^}" chrome-sandbox libEGL.so libGLESv2.so libvk_swiftshader.so
-
-	if use system-ffmpeg; then
-		dosym "../../usr/$(get_libdir)/chromium/libffmpeg.so" "${DESTDIR}/libffmpeg.so" || die
-	else
-		doexe libffmpeg.so
-	fi
+	doexe "${MY_PN^}" chrome-sandbox libEGL.so libffmpeg.so libGLESv2.so libvk_swiftshader.so
 
 	insinto "${DESTDIR}"
 	doins chrome_100_percent.pak chrome_200_percent.pak icudtl.dat resources.pak snapshot_blob.bin v8_context_snapshot.bin
 	insopts -m0755
-	doins -r locales resources swiftshader
+	doins -r locales resources
 
 	# Chrome-sandbox requires the setuid bit to be specifically set.
 	# see https://github.com/electron/electron/issues/17972
 	fowners root "${DESTDIR}/chrome-sandbox"
 	fperms 4711 "${DESTDIR}/chrome-sandbox"
 
+	# Crashpad is included in the package once in a while and when it does, it must be installed.
+	# See #903616 and #890595
+	[[ -x chrome_crashpad_handler ]] && doins chrome_crashpad_handler
+
 	dosym "${DESTDIR}/${MY_PN^}" "/usr/bin/${MY_PN}"
+
+	# https://bugs.gentoo.org/898912
+	if use appindicator; then
+		dosym ../../usr/lib64/libayatana-appindicator3.so /opt/discord/libappindicator3.so
+	fi
 }
 
 pkg_postinst() {
@@ -147,5 +131,4 @@ pkg_postinst() {
 
 	optfeature "sound support" \
 		media-sound/pulseaudio media-sound/apulse[sdk] media-video/pipewire
-	optfeature "system tray support" dev-libs/libappindicator
 }
