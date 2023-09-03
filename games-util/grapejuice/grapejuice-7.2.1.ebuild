@@ -21,6 +21,7 @@ DEPEND="app-arch/unzip
 	dev-python/packaging
 	dev-python/pip
 	dev-python/psutil
+	dev-python/pydantic
 	dev-python/requests
 	dev-python/setuptools
 	dev-python/unidecode
