@@ -41,7 +41,7 @@ DEPEND="${RDEPEND}
 
 BDEPEND="
 	virtual/pkgconfig
-	>=dev-util/cmake-3.24.3
+	>=dev-build/cmake-3.24.3
 "
 
 src_unpack() {
