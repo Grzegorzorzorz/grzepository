@@ -44,7 +44,6 @@ DEPEND="${RDEPEND}
     ) )
 	sys-apps/dbus
     media-libs/sdl2-gfx
-    gfx? ( >=sys-power/supergfxctl-5.2.1[gnome?] )
     $(llvm_gen_dep '
 		llvm-core/clang:${LLVM_SLOT}=
 		llvm-core/llvm:${LLVM_SLOT}=
